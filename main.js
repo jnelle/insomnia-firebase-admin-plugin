@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 
 let app, auth, apiKey = null
+const firebaseUrl = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key='
 
 module.exports.templateTags = [{
     name: 'firebase',
@@ -30,24 +31,18 @@ module.exports.templateTags = [{
         }
         if (app && email) {
             auth = app.auth()
-            if (type === 'uid') return await getUid(email)
-            if (type === 'token') return await generateToken(email)
+            user = await auth.getUserByEmail(email)
+
+            if (type === 'uid') return user.uid
+            if (type === 'token') return await generateToken(user, auth)
         } else {
             return 'waiting for values...'
         }
     },
 }]
 
-async function getUid(email) {
-    auth = app.auth()
-    user = await auth.getUserByEmail(email)
-    return user.uid
-}
 
-async function generateToken(email) {
-    auth = app.auth()
-
-    user = await auth.getUserByEmail(email)
+async function generateToken(user, auth) {
     customToken = await auth.createCustomToken(user.uid)
     const data = await convertToken(customToken)
     return data.idToken;
@@ -55,7 +50,7 @@ async function generateToken(email) {
 
 async function convertToken(customToken) {
     try {
-        const res = await fetch(`https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyCustomToken?key=` + apiKey, {
+        const res = await fetch(firebaseUrl + apiKey, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
