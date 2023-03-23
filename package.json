@@ -1,0 +1,13 @@
+{
+  "name": "insomnia-plugin-firebase-auth-admin",
+  "version": "0.0.1",
+  "private": true,
+  "insomnia": {
+    "name": "firebase-auth-admin",
+    "description": ""
+  },
+  "main": "main.js",
+  "dependencies": {
+    "firebase-admin": "^11.5.0"
+  }
+}
