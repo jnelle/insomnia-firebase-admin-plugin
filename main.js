@@ -29,12 +29,12 @@ module.exports.templateTags = [{
             }, meta.requestId)
             apiKey = context.firebase.apiKey
         }
-        if (app && email) {
+        if (app && isValidEmail(email)) {
             auth = app.auth()
             user = await auth.getUserByEmail(email)
 
             if (type === 'uid') return user.uid
-            if (type === 'token') return await generateToken(user, auth)
+            if (type === 'token') return await generateToken(user)
         } else {
             return 'waiting for values...'
         }
@@ -42,7 +42,7 @@ module.exports.templateTags = [{
 }]
 
 
-async function generateToken(user, auth) {
+async function generateToken(user) {
     customToken = await auth.createCustomToken(user.uid)
     const data = await convertToken(customToken)
     return data.idToken;
@@ -66,4 +66,9 @@ async function convertToken(customToken) {
     } catch (error) {
         return error
     }
+}
+
+function isValidEmail(email) {
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return pattern.test(email);
 }
